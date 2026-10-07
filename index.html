@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>C++ and Maths: 91-day tracker</title>
+<title>Month Planner: set goals and track them daily</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
   --paper:#EEF1F5; --grid:#D9DFE8; --ink:#111B33; --ink2:#4A5775; --card:#FBFCFE; --line:#C3CCDB;
-  --cpp:#2B47E8; --cpp-soft:#CCD4FA; --math:#0A7F72; --math-soft:#BFE6E0; --hl:#FFE45E; --on:#FFFFFF;
-  --wkend:#E4E9F1; --warn:#B3261E;
+  --t0:#2B47E8; --t1:#0A7F72; --t2:#B45309; --t3:#B0207A;
+  --accent:#2B47E8; --soft:#CCD4FA; --hl:#FFE45E; --on:#FFFFFF; --wkend:#E4E9F1; --warn:#B3261E;
   --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   box-sizing:border-box;
@@ -19,17 +19,18 @@
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --paper:#0E1424; --grid:#19223A; --ink:#E8ECF6; --ink2:#9AA6C4; --card:#151D33; --line:#2B3657;
-    --cpp:#7C93FF; --cpp-soft:#26335F; --math:#3CD0BC; --math-soft:#17413F; --hl:#7A6A12; --on:#0E1424;
-    --wkend:#1B2540; --warn:#FF8A80;
+    --t0:#7C93FF; --t1:#3CD0BC; --t2:#F59E0B; --t3:#F472B6;
+    --accent:#7C93FF; --soft:#26335F; --hl:#7A6A12; --on:#0E1424; --wkend:#1B2540; --warn:#FF8A80;
   }
 }
 :root[data-theme="dark"]{
   --paper:#0E1424; --grid:#19223A; --ink:#E8ECF6; --ink2:#9AA6C4; --card:#151D33; --line:#2B3657;
-  --cpp:#7C93FF; --cpp-soft:#26335F; --math:#3CD0BC; --math-soft:#17413F; --hl:#7A6A12; --on:#0E1424;
-  --wkend:#1B2540; --warn:#FF8A80;
+  --t0:#7C93FF; --t1:#3CD0BC; --t2:#F59E0B; --t3:#F472B6;
+  --accent:#7C93FF; --soft:#26335F; --hl:#7A6A12; --on:#0E1424; --wkend:#1B2540; --warn:#FF8A80;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
 body{
   margin:0; min-height:100%; color:var(--ink); font:16px/1.5 var(--body);
   background-color:var(--paper);
@@ -37,11 +38,14 @@ body{
   background-size:24px 24px;
 }
 .wrap{max-width:760px;margin:0 auto;padding:28px 16px 56px}
-h1{font:800 clamp(1.9rem,6vw,2.9rem)/1.02 var(--display);letter-spacing:-.03em;margin:0 0 10px}
+h1{font:800 clamp(1.9rem,6vw,2.9rem)/1.04 var(--display);letter-spacing:-.03em;margin:0 0 10px}
 h2{font:700 1.15rem/1.2 var(--display);margin:0 0 12px;letter-spacing:-.01em}
-.sub{margin:0;color:var(--ink2);max-width:52ch}
+h2.mh{margin:22px 0 10px;font-size:1rem;color:var(--ink2)}
+.sub{margin:0;color:var(--ink2);max-width:56ch}
 button{font:inherit;color:inherit;cursor:pointer}
-:focus-visible{outline:3px solid var(--cpp);outline-offset:2px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.in{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-width:0}
+input[type=number].in{width:5.2rem}
 
 .stats{display:grid;grid-template-columns:repeat(4,1fr);margin:24px 0 20px;background:var(--card);border:1px solid var(--line);border-radius:6px}
 .stats div{padding:12px 12px 10px;border-left:1px solid var(--line)}
@@ -56,8 +60,8 @@ button{font:inherit;color:inherit;cursor:pointer}
   .stats div:nth-child(n+3){border-top:1px solid var(--line)}
 }
 
-.tabs{display:flex;gap:4px;border-bottom:2px solid var(--ink);margin-bottom:18px}
-.tabs button{background:none;border:0;padding:10px 16px;font:600 .95rem var(--body);color:var(--ink2);border-radius:6px 6px 0 0}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--ink);margin-bottom:18px;overflow-x:auto}
+.tabs button{background:none;border:0;padding:10px 16px;font:600 .95rem var(--body);color:var(--ink2);border-radius:6px 6px 0 0;white-space:nowrap}
 .tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
 
 .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px}
@@ -75,30 +79,27 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 .focus{margin:14px 0 18px;padding:12px 14px;border-left:4px solid var(--ink);background:var(--paper);border-radius:0 6px 6px 0;font-size:.92rem}
 .focus p{margin:0}.focus p+p{margin-top:4px}
-.tag{display:inline-block;font-weight:700;margin-right:6px}
-.tag.cpp{color:var(--cpp)}.tag.math{color:var(--math)}
+.tag{display:inline-block;font-weight:700;margin-right:6px;color:var(--tc)}
 
-.prow{display:grid;grid-template-columns:3.6rem repeat(5,1fr);gap:8px;align-items:center}
-.prow+.prow{margin-top:8px}
-.plabel{font:700 .95rem var(--display)}
-.plabel.cpp{color:var(--cpp)}.plabel.math{color:var(--math)}
-.dot{aspect-ratio:1;max-width:64px;width:100%;border-radius:50%;border:2.5px solid currentColor;background:transparent;font:700 1rem var(--display);padding:0;transition:background .12s,color .12s,transform .12s}
-.dot.cpp{color:var(--cpp)}.dot.math{color:var(--math)}
-.dot.on.cpp{background:var(--cpp);color:var(--on)}
-.dot.on.math{background:var(--math);color:var(--on)}
+.trow+.trow{margin-top:16px}
+.thead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.plabel{font:700 1rem var(--display);color:var(--tc)}
+.dots{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;justify-items:start}
+.dot{aspect-ratio:1;max-width:60px;width:100%;border-radius:50%;border:2.5px solid var(--tc);color:var(--tc);background:transparent;font:700 1rem var(--display);padding:0;transition:background .12s,color .12s,transform .12s}
+.dot.on{background:var(--tc);color:var(--on)}
 .dot:active{transform:scale(.92)}
 .count{font:800 1.1rem var(--display);white-space:nowrap}
 .count small{font:500 .85rem var(--body);color:var(--ink2)}
-.ph{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.ph{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;gap:8px}
 .ph h2{margin:0}
 
 .hours{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .step{display:flex;align-items:center;gap:10px}
 .step button{width:42px;height:42px;border-radius:6px;border:1px solid var(--ink);background:var(--paper);font:700 1.3rem var(--display);line-height:1}
 .step output{font:800 1.8rem var(--display);min-width:4.2ch;text-align:center;letter-spacing:-.02em}
-.meter{position:relative;height:14px;border:1.5px solid var(--ink);border-radius:99px;background:var(--paper);margin:16px 0 4px;overflow:visible}
-.meter .fill{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--cpp-soft);transition:width .2s}
-.meter .fill.ok{background:var(--cpp)}
+.meter{position:relative;height:14px;border:1.5px solid var(--ink);border-radius:99px;background:var(--paper);margin:16px 0 4px}
+.meter .fill{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--soft);transition:width .2s}
+.meter .fill.ok{background:var(--accent)}
 .meter .tick{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink)}
 .mlabels{position:relative;height:1.3rem;font-size:.78rem;color:var(--ink2)}
 .mlabels span{position:absolute;top:0;white-space:nowrap}
@@ -109,6 +110,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn{border:1.5px solid var(--ink);background:var(--paper);border-radius:6px;padding:8px 14px;font-weight:600;font-size:.9rem}
 .btn.solid{background:var(--ink);color:var(--paper)}
 .btn.danger{border-color:var(--warn);color:var(--warn)}
+.btn.sm{padding:5px 10px;font-size:.82rem}
 .status{margin:12px 0 0;font-weight:500}
 .hint{margin:6px 0 0;color:var(--ink2);font-size:.9rem}
 
@@ -118,24 +120,24 @@ button{font:inherit;color:inherit;cursor:pointer}
 .check[aria-pressed="true"] i{background:var(--ink);color:var(--paper)}
 .check[aria-pressed="true"] span{text-decoration:line-through;text-decoration-color:var(--ink2)}
 .holrow{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:.92rem}
-.holrow input{width:20px;height:20px;accent-color:var(--cpp)}
-textarea{width:100%;min-height:84px;resize:vertical;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);padding:10px 12px;font:inherit}
+.holrow input{width:20px;height:20px;accent-color:var(--accent)}
+textarea.in{width:100%;min-height:84px;resize:vertical}
 label.l{display:block;font-weight:600;font-size:.92rem;margin-bottom:6px}
 
 .cal{display:grid;gap:6px}
-.crow{display:grid;grid-template-columns:2.4rem repeat(7,1fr);gap:6px;align-items:stretch}
+.crow{display:grid;grid-template-columns:2.4rem repeat(7,1fr);gap:6px}
 .cw{display:flex;align-items:center;font:700 .85rem var(--display);color:var(--ink2)}
 .cell{position:relative;min-height:48px;aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:var(--card);padding:0;font:700 1.05rem var(--display);display:grid;place-items:center;color:var(--ink)}
 .cell.wk{background:var(--wkend)}
 .cell .wd,.cell .mo{position:absolute;top:3px;font:500 .62rem var(--body);color:var(--ink2)}
 .cell .wd{left:4px}.cell .mo{right:4px}
-.cell.part{background-image:linear-gradient(to top,var(--cpp-soft) var(--f),transparent var(--f))}
-.cell.done{background:var(--cpp);border-color:var(--cpp);color:var(--on)}
+.cell.part{background-image:linear-gradient(to top,var(--soft) var(--f),transparent var(--f))}
+.cell.done{background:var(--accent);border-color:var(--accent);color:var(--on)}
 .cell.done .wd,.cell.done .mo{color:var(--on);opacity:.8}
 .cell.miss{border-style:dashed}
 .cell.hol::after{content:"";position:absolute;right:4px;bottom:4px;width:8px;height:8px;border-radius:50%;background:var(--hl);border:1.5px solid #111B33}
 .cell.today{outline:3px solid var(--ink);outline-offset:1px}
-.cell.sel{box-shadow:inset 0 0 0 3px var(--math)}
+.cell.sel{box-shadow:inset 0 0 0 3px var(--t1)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font-size:.82rem;color:var(--ink2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:16px;height:16px;border-radius:3px;border:1px solid var(--line);display:inline-block}
@@ -147,176 +149,298 @@ details.week summary::-webkit-details-marker{display:none}
 .wn{font:700 1rem var(--display)}
 .wr{color:var(--ink2);font-size:.85rem}
 .wp{margin-left:auto;font-size:.85rem;font-weight:600}
-.wb{padding:0 14px 14px}
-.wb p{margin:0}.wb p+p{margin-top:6px}
+.wb{padding:0 14px 14px;display:grid;gap:8px}
+.wl{display:grid;grid-template-columns:5.5rem 1fr;gap:8px;align-items:center}
+.wl .tag{margin:0;overflow-wrap:anywhere}
 details.week.cur{border:2px solid var(--ink)}
 table{width:100%;border-collapse:collapse;font-size:.92rem}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
 th{font-weight:600;color:var(--ink2);font-size:.82rem}
 
-.foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;font-size:.88rem;color:var(--ink2)}
-.foot input[type=date]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
-.foot .grow{flex:1 1 100%}
+.fld{display:grid;gap:6px;margin-bottom:14px}
+.fld>span{font-weight:600;font-size:.92rem}
+.frow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.trk{display:grid;grid-template-columns:14px 1fr 5.2rem auto;gap:8px;align-items:center;margin-bottom:8px}
+.trk .sw2{width:14px;height:36px;border-radius:3px;background:var(--tc)}
+.hab{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px}
+.setup>*+*{margin-top:16px}
+.hrs td:first-child{padding-left:0}
+.hrs input{width:4.6rem}
+
+.welcome h2{font-size:1.5rem}
+.tpls{display:grid;gap:10px;margin-top:14px}
+.tpl{text-align:left;padding:14px 16px;border:2px solid var(--ink);border-radius:6px;background:var(--paper)}
+.tpl b{display:block;font:700 1.05rem var(--display)}
+.tpl span{color:var(--ink2);font-size:.9rem}
+.tpl:hover{background:var(--card);box-shadow:4px 4px 0 var(--ink)}
+
+.foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:.88rem;color:var(--ink2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.footer{
+  margin-top:28px;
+  padding:18px 10px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  color:var(--ink2);
+  font-size:.88rem;
+}
+.footer strong{color:var(--ink)}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>91 days of C++ and programming maths</h1>
-    <p class="sub">Ten problems every day. Weekdays 2 to 4 hours, weekends 3 to 6 hours, holidays a full day.</p>
+    <h1 id="ptitle"></h1>
+    <p class="sub" id="psub"></p>
   </header>
   <dl class="stats" id="stats"></dl>
-  <nav class="tabs" role="tablist" aria-label="Views">
+  <nav class="tabs" role="tablist" aria-label="Views" id="tabs">
     <button role="tab" data-act="tab" data-v="today">Today</button>
     <button role="tab" data-act="tab" data-v="cal">Calendar</button>
-    <button role="tab" data-act="tab" data-v="plan">Roadmap</button>
+    <button role="tab" data-act="tab" data-v="weeks">Weeks</button>
+    <button role="tab" data-act="tab" data-v="setup">Setup</button>
   </nav>
   <main id="app"></main>
-  <footer class="foot" id="foot"></footer>
+  <footer class="footer">
+  <div>Made with ❤️ by <strong>Prabhas</strong></div>
+  <div>Your plan and progress are saved in this browser only.</div>
+</footer>
 </div>
 
 <script>
-const KEY='cppmaths-tracker-v1';
-const PLAN_DAYS=91;
-const TYPES={
-  weekday:{name:'Weekday',min:2,goal:4,range:'2 to 4 h',tip:'Concept for 45 minutes, problems for the rest, then 15 minutes noting what went wrong.'},
-  weekend:{name:'Weekend',min:3,goal:6,range:'3 to 6 h',tip:'One timed set of 10 in the morning, then redo every miss and read ahead.'},
-  holiday:{name:'Holiday',min:6,goal:8,range:'full day, 6 to 8 h',tip:'Two timed sets, one longer problem, and a revision pass over the whole week.'}
-};
-const WEEKS=[
-  {c:'Setup, cin/cout, variables and types, if/else, loops, switch',m:'Parity, divisibility rules, remainders, number representation'},
-  {c:'Functions, arrays, 2D arrays, strings',m:'GCD and LCM with Euclid, factors, primality check up to sqrt(n)'},
-  {c:'Pointers, references, structs, pair, sort with comparators',m:'Sieve of Eratosthenes, prime factorisation, modular arithmetic'},
-  {c:'STL: vector, set, map, unordered_map, stack, queue',m:'Fast power, modular exponentiation, modular inverse, nCr mod p'},
-  {c:'Recursion, backtracking, subsets and permutations',m:'Induction, recurrences, Fibonacci, sum formulas'},
-  {c:'Binary search, two pointers, prefix sums, sliding window',m:'Arithmetic and geometric series, bit tricks, XOR properties'},
-  {c:'Classes, constructors, encapsulation, operator overloading, const',m:'Permutations, combinations, Pascal triangle, stars and bars'},
-  {c:'Sorting algorithms, time complexity, greedy methods',m:"Euler's totient, Chinese remainder theorem, extended Euclid"},
-  {c:'Linked list, stack and queue from scratch, binary trees, BST, smart pointers',m:'Probability, expected value, counting principles'},
-  {c:'Graphs: adjacency lists, BFS, DFS, shortest path basics',m:'Graph theory: degrees, trees, connectivity, bipartite graphs'},
-  {c:'Dynamic programming: 1D, knapsack, LIS, LCS',m:'Inclusion-exclusion, counting with DP, Catalan numbers'},
-  {c:'STL algorithms, lambdas, templates, bitset, priority_queue',m:'Matrices, matrix exponentiation, basic geometry'},
-  {c:'Revision of weak topics, three timed mock contests, one mini project',m:'Pigeonhole principle, mixed revision, review of your error log'}
-];
+const KEY='goal-planner-v2', OLD='cppmaths-tracker-v1';
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FULLMON=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WDN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const TYPE_NAMES={weekday:'Weekday',weekend:'Weekend',holiday:'Holiday'};
 
+function uid(){return 'x'+Math.random().toString(36).slice(2,8)}
 function pad(n){return String(n).padStart(2,'0')}
 function fmt(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function parse(s){const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])}
 function addDays(s,n){const d=parse(s);d.setDate(d.getDate()+n);return fmt(d)}
 function diff(a,b){return Math.round((parse(a)-parse(b))/864e5)}
 function todayStr(){return fmt(new Date())}
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function fmtH(x){return Number(x.toFixed(2))+' h'}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fmtH(x){return Number(Number(x).toFixed(2))+' h'}
 function short(s){const d=parse(s);return MON[d.getMonth()]+' '+d.getDate()}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function cap(s){s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1)}
 
-let S={start:todayStr(),days:{},sel:null,tab:'today'};
+/* ---------- templates ---------- */
+const CPP_WEEKS=[
+  ['Setup, cin/cout, variables and types, if/else, loops, switch','Parity, divisibility rules, remainders, number representation'],
+  ['Functions, arrays, 2D arrays, strings','GCD and LCM with Euclid, factors, primality check up to sqrt(n)'],
+  ['Pointers, references, structs, pair, sort with comparators','Sieve of Eratosthenes, prime factorisation, modular arithmetic'],
+  ['STL: vector, set, map, unordered_map, stack, queue','Fast power, modular exponentiation, modular inverse, nCr mod p'],
+  ['Recursion, backtracking, subsets and permutations','Induction, recurrences, Fibonacci, sum formulas'],
+  ['Binary search, two pointers, prefix sums, sliding window','Arithmetic and geometric series, bit tricks, XOR properties'],
+  ['Classes, constructors, encapsulation, operator overloading, const','Permutations, combinations, Pascal triangle, stars and bars'],
+  ['Sorting algorithms, time complexity, greedy methods',"Euler's totient, Chinese remainder theorem, extended Euclid"],
+  ['Linked list, stack and queue from scratch, binary trees, BST, smart pointers','Probability, expected value, counting principles'],
+  ['Graphs: adjacency lists, BFS, DFS, shortest path basics','Graph theory: degrees, trees, connectivity, bipartite graphs'],
+  ['Dynamic programming: 1D, knapsack, LIS, LCS','Inclusion-exclusion, counting with DP, Catalan numbers'],
+  ['STL algorithms, lambdas, templates, bitset, priority_queue','Matrices, matrix exponentiation, basic geometry'],
+  ['Revision of weak topics, three timed mock contests, one mini project','Pigeonhole principle, mixed revision, review of your error log']
+];
+function presetCpp(start){
+  const a=uid(),b=uid();
+  return {title:'C++ and programming maths',start:start,weeks:13,unit:'problems',
+    tracks:[{id:a,name:'C++',n:5},{id:b,name:'Maths',n:5}],
+    hours:{weekday:{min:2,goal:4},weekend:{min:3,goal:6},holiday:{min:6,goal:8}},
+    habits:[{id:uid(),t:'Studied the topic before solving'},{id:uid(),t:"Redid yesterday's wrong problems"}],
+    weekly:CPP_WEEKS.map(function(w){const o={};o[a]=w[0];o[b]=w[1];return o})};
+}
+function presetExam(start){
+  const a=uid(),b=uid();
+  return {title:'Exam preparation',start:start,weeks:12,unit:'tasks',
+    tracks:[{id:a,name:'Concepts',n:3},{id:b,name:'Practice questions',n:7}],
+    hours:{weekday:{min:2,goal:4},weekend:{min:4,goal:7},holiday:{min:6,goal:9}},
+    habits:[{id:uid(),t:"Revised yesterday's notes"},{id:uid(),t:'Slept before midnight'}],
+    weekly:[]};
+}
+function presetBlank(start){
+  return {title:'My plan',start:start,weeks:13,unit:'tasks',
+    tracks:[{id:uid(),name:'Main task',n:5}],
+    hours:{weekday:{min:1,goal:2},weekend:{min:2,goal:4},holiday:{min:4,goal:6}},
+    habits:[],weekly:[]};
+}
+function norm(p){
+  if(!Array.isArray(p.weekly))p.weekly=[];
+  while(p.weekly.length<p.weeks)p.weekly.push({});
+  if(!Array.isArray(p.habits))p.habits=[];
+  return p;
+}
+
+/* ---------- state ---------- */
+let S={plan:null,days:{},sel:null,tab:'today'};
 try{
   const raw=localStorage.getItem(KEY);
-  if(raw){const o=JSON.parse(raw);if(o&&o.start)S.start=o.start;if(o&&o.days)S.days=o.days;}
+  if(raw){
+    const o=JSON.parse(raw);
+    if(o&&o.plan&&Array.isArray(o.plan.tracks)){S.plan=norm(o.plan);S.days=o.days||{}}
+  }else{
+    const old=localStorage.getItem(OLD);
+    if(old){
+      const o=JSON.parse(old),p=presetCpp(o.start||todayStr()),days={};
+      Object.keys(o.days||{}).forEach(function(k){
+        const r=o.days[k],c={},hb={};
+        c[p.tracks[0].id]=Math.min(r.p||0,5);
+        c[p.tracks[1].id]=Math.max((r.p||0)-5,0);
+        if(r.a)hb[p.habits[0].id]=true;
+        if(r.v)hb[p.habits[1].id]=true;
+        days[k]={c:c,h:r.h||0,hol:!!r.hol,hb:hb,n:r.n||''};
+      });
+      S.plan=norm(p);S.days=days;
+    }
+  }
 }catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({start:S.start,days:S.days}))}catch(e){}}
-function clampSel(d){const i=diff(d,S.start);if(i<0)return S.start;if(i>=PLAN_DAYS)return addDays(S.start,PLAN_DAYS-1);return d}
-S.sel=clampSel(todayStr());
-save();
+function save(){try{localStorage.setItem(KEY,JSON.stringify({plan:S.plan,days:S.days}))}catch(e){}}
+if(S.plan)save();
 
-function blank(){return {p:0,h:0,hol:false,a:false,v:false,n:''}}
+/* ---------- helpers ---------- */
+function planDays(){return S.plan.weeks*7}
+function perDay(){return S.plan.tracks.reduce(function(a,t){return a+t.n},0)}
+function clampSel(d){
+  const i=diff(d,S.plan.start);
+  if(i<0)return S.plan.start;
+  if(i>=planDays())return addDays(S.plan.start,planDays()-1);
+  return d;
+}
+function blank(){return {c:{},h:0,hol:false,hb:{},n:''}}
 function get(d){return S.days[d]||blank()}
-function edit(d){if(!S.days[d])S.days[d]=blank();return S.days[d]}
+function edit(d){if(!S.days[d])S.days[d]=blank();const r=S.days[d];if(!r.c)r.c={};if(!r.hb)r.hb={};return r}
 function typeOf(d){const r=get(d);if(r.hol)return 'holiday';const w=parse(d).getDay();return (w===0||w===6)?'weekend':'weekday'}
-function isDone(d){const r=S.days[d];if(!r)return false;return r.p>=10&&r.h>=TYPES[typeOf(d)].min}
+function tgt(key){const h=S.plan.hours[key];return {min:h.min,goal:Math.max(h.goal,h.min,0.5)}}
+function rng(key){const t=tgt(key);return t.min===t.goal?fmtH(t.goal):Number(t.min)+' to '+fmtH(t.goal)}
+function got(r){return S.plan.tracks.reduce(function(a,t){return a+Math.min((r.c&&r.c[t.id])||0,t.n)},0)}
+function isDone(d){const r=S.days[d];if(!r)return false;return got(r)>=perDay()&&r.h>=tgt(typeOf(d)).min}
 
 let resetArm=false;
 let T={on:false,start:0,iv:null};
 function fmtT(ms){const s=Math.floor(ms/1000);return Math.floor(s/3600)+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60)}
 function tick(){const e=document.getElementById('tval');if(e&&T.on)e.textContent=fmtT(Date.now()-T.start)}
 
+/* ---------- render: header and stats ---------- */
+function renderHead(){
+  const t=document.getElementById('ptitle'),s=document.getElementById('psub');
+  if(!S.plan){
+    t.textContent='Plan your months, then tick them off daily';
+    s.textContent='Set a goal, choose your daily target and study hours, and track it day by day.';
+    return;
+  }
+  t.textContent=S.plan.title||'My plan';
+  s.textContent=perDay()+' '+S.plan.unit+' a day. Weekdays '+rng('weekday')+', weekends '+rng('weekend')+', holidays '+rng('holiday')+'.';
+}
 function renderStats(){
+  if(!S.plan)return;
+  const N=planDays();
   let dd=0,pp=0,hh=0;
-  for(let i=0;i<PLAN_DAYS;i++){
-    const d=addDays(S.start,i);const r=S.days[d];
-    if(r){pp+=r.p;hh+=r.h}
+  for(let i=0;i<N;i++){
+    const d=addDays(S.plan.start,i),r=S.days[d];
+    if(r){pp+=got(r);hh+=r.h}
     if(isDone(d))dd++;
   }
   let cur=clampSel(todayStr());
   if(!isDone(cur))cur=addDays(cur,-1);
   let st=0;
-  while(diff(cur,S.start)>=0&&isDone(cur)){st++;cur=addDays(cur,-1)}
+  while(diff(cur,S.plan.start)>=0&&isDone(cur)){st++;cur=addDays(cur,-1)}
   document.getElementById('stats').innerHTML=
     '<div class="streak"><dt>Streak</dt><dd><span>'+st+'</span> <small>'+(st===1?'day':'days')+'</small></dd></div>'+
-    '<div><dt>Days done</dt><dd>'+dd+' <small>of 91</small></dd></div>'+
-    '<div><dt>Problems</dt><dd>'+pp+' <small>of 910</small></dd></div>'+
-    '<div><dt>Study time</dt><dd>'+Number(hh.toFixed(1))+' <small>hours</small></dd></div>';
+    '<div><dt>Days done</dt><dd>'+dd+' <small>of '+N+'</small></dd></div>'+
+    '<div><dt>'+esc(cap(S.plan.unit))+'</dt><dd>'+pp+' <small>of '+(N*perDay())+'</small></dd></div>'+
+    '<div><dt>Time logged</dt><dd>'+Number(hh.toFixed(1))+' <small>hours</small></dd></div>';
 }
 
+/* ---------- render: welcome ---------- */
+function renderWelcome(){
+  return '<section class="card main welcome"><h2>Start a plan</h2>'+
+    '<p class="sub">Pick a starting point. You can change every goal, topic and number afterwards.</p>'+
+    '<div class="tpls">'+
+    '<button class="tpl" data-act="tpl" data-v="cpp"><b>C++ and programming maths</b><span>13 weeks, 5 C++ and 5 maths problems a day, topics for every week already filled in.</span></button>'+
+    '<button class="tpl" data-act="tpl" data-v="exam"><b>Exam preparation</b><span>12 weeks, concepts plus practice questions, you add the weekly topics.</span></button>'+
+    '<button class="tpl" data-act="tpl" data-v="blank"><b>Blank plan</b><span>One task a day. Name your goal and build it from scratch.</span></button>'+
+    '</div></section>';
+}
+
+/* ---------- render: today ---------- */
 function statusText(r,t){
-  const need=Math.max(0,t.min-r.h),left=Math.max(0,t.goal-r.h),pl=10-r.p;
-  if(r.p>=10&&r.h>=t.min)return 'Day complete.'+(left>0?' '+fmtH(left)+' more reaches the goal if you have it in you.':' Goal hit too.');
+  const need=Math.max(0,t.min-r.h),left=Math.max(0,t.goal-r.h),pl=perDay()-got(r);
+  if(pl<=0&&r.h>=t.min)return 'Day complete.'+(left>0?' '+fmtH(left)+' more reaches the goal if you have it in you.':' Goal hit too.');
   const parts=[];
-  if(pl>0)parts.push(pl+(pl===1?' problem':' problems')+' left');
+  if(pl>0)parts.push(pl+' '+S.plan.unit+' left');
   if(need>0)parts.push(fmtH(need)+' more to hit the minimum');
   return parts.join(', ');
 }
-
 function renderToday(){
-  const d=S.sel,i=diff(d,S.start),r=get(d),ty=typeOf(d),t=TYPES[ty];
-  const wk=WEEKS[Math.floor(i/7)];
+  const p=S.plan,d=S.sel,i=diff(d,p.start),r=get(d),ty=typeOf(d),t=tgt(ty);
+  const wk=p.weekly[Math.floor(i/7)]||{};
   const dt=parse(d),isToday=d===todayStr();
+  let focus='';
+  p.tracks.forEach(function(tr,k){
+    if(wk[tr.id])focus+='<p><span class="tag" style="--tc:var(--t'+k+')">'+esc(tr.name)+'</span>'+esc(wk[tr.id])+'</p>';
+  });
+  if(!focus)focus='<p class="hint" style="margin:0">No topic set for this week yet. Add one in the Weeks tab.</p>';
   let rows='';
-  for(let g=0;g<2;g++){
-    const k=g===0?'cpp':'math';
+  p.tracks.forEach(function(tr,k){
+    const v=Math.min((r.c&&r.c[tr.id])||0,tr.n);
     let dots='';
-    for(let j=1;j<=5;j++){
-      const n=g*5+j,on=n<=r.p;
-      dots+='<button class="dot '+k+(on?' on':'')+'" data-act="prob" data-n="'+n+'" aria-pressed="'+on+'" aria-label="Problem '+n+', '+(g===0?'C++':'maths')+'">'+n+'</button>';
+    for(let n=1;n<=tr.n;n++){
+      const on=n<=v;
+      dots+='<button class="dot'+(on?' on':'')+'" data-act="prob" data-tid="'+tr.id+'" data-n="'+n+'" aria-pressed="'+on+'" aria-label="'+esc(tr.name)+' '+n+'">'+n+'</button>';
     }
-    rows+='<div class="prow"><span class="plabel '+k+'">'+(g===0?'C++':'Maths')+'</span>'+dots+'</div>';
-  }
+    rows+='<div class="trow" style="--tc:var(--t'+k+')"><div class="thead"><span class="plabel">'+esc(tr.name)+'</span><span class="count">'+v+' <small>of '+tr.n+'</small></span></div><div class="dots">'+dots+'</div></div>';
+  });
   const pct=Math.min(r.h/t.goal,1)*100,minPct=t.min/t.goal*100;
   const timer=(isToday||T.on)?
     '<div class="timer"><span class="tv" id="tval">'+(T.on?fmtT(Date.now()-T.start):'0:00:00')+'</span>'+
     (T.on?'<button class="btn solid" data-act="tstop">Stop and add</button>':'<button class="btn" data-act="tstart">Start timer</button>')+'</div>':'';
+  let habits='';
+  if(p.habits.length){
+    habits='<section class="card"><h2>Habits</h2><div class="checks">'+
+      p.habits.map(function(h){
+        const on=!!(r.hb&&r.hb[h.id]);
+        return '<button class="check" data-act="chk" data-hid="'+h.id+'" aria-pressed="'+on+'"><i>'+(on?'&#10003;':'')+'</i><span>'+esc(h.t)+'</span></button>';
+      }).join('')+'</div></section>';
+  }
   return '<div class="stack">'+
   '<section class="card main">'+
-    '<div class="dayhead"><div><h2>Day '+(i+1)+' of 91</h2>'+
-      '<p><span class="chip'+(ty==='holiday'?' hol':'')+'">'+t.name+'</span>'+WDN[dt.getDay()]+', '+short(d)+(isToday?' (today)':'')+'</p></div>'+
-      '<div class="nav"><button data-act="prev" aria-label="Previous day"'+(i<=0?' disabled':'')+'>&#8592;</button><button data-act="next" aria-label="Next day"'+(i>=PLAN_DAYS-1?' disabled':'')+'>&#8594;</button></div></div>'+
-    (isToday?'':'<p class="hint"><button class="btn" data-act="jumptoday">Jump to today</button></p>')+
-    '<div class="focus"><p><span class="tag cpp">C++</span>'+esc(wk.c)+'</p><p><span class="tag math">Maths</span>'+esc(wk.m)+'</p></div>'+
-    '<div class="ph"><h2>Problems solved</h2><span class="count">'+r.p+' <small>of 10</small></span></div>'+
+    '<div class="dayhead"><div><h2>Day '+(i+1)+' of '+planDays()+'</h2>'+
+      '<p><span class="chip'+(ty==='holiday'?' hol':'')+'">'+TYPE_NAMES[ty]+'</span>'+WDN[dt.getDay()]+', '+short(d)+(isToday?' (today)':'')+'</p></div>'+
+      '<div class="nav"><button data-act="prev" aria-label="Previous day"'+(i<=0?' disabled':'')+'>&#8592;</button><button data-act="next" aria-label="Next day"'+(i>=planDays()-1?' disabled':'')+'>&#8594;</button></div></div>'+
+    (isToday?'':'<p class="hint"><button class="btn sm" data-act="jumptoday">Jump to today</button></p>')+
+    '<div class="focus">'+focus+'</div>'+
     rows+
-    '<p class="hint">Tap a circle to log up to that problem. Tap the last filled one to undo it.</p>'+
+    '<p class="hint">Tap a circle to log up to that number. Tap the last filled one to undo it.</p>'+
   '</section>'+
   '<section class="card">'+
-    '<div class="ph"><h2>Study time</h2><span class="count">'+fmtH(r.h)+' <small>target '+t.range+'</small></span></div>'+
+    '<div class="ph"><h2>Time</h2><span class="count">'+fmtH(r.h)+' <small>target '+rng(ty)+'</small></span></div>'+
     '<div class="hours"><div class="step"><button data-act="hdec" aria-label="Remove half an hour">&#8722;</button><output>'+Number(r.h.toFixed(2))+'</output><button data-act="hinc" aria-label="Add half an hour">+</button></div>'+timer+'</div>'+
     '<div class="meter" role="img" aria-label="'+fmtH(r.h)+' of '+fmtH(t.goal)+' goal"><div class="fill'+(r.h>=t.min?' ok':'')+'" style="width:'+pct+'%"></div><span class="tick" style="left:'+minPct+'%"></span></div>'+
     '<div class="mlabels"><span class="mn" style="left:'+minPct+'%">min '+fmtH(t.min)+'</span><span class="gl">goal '+fmtH(t.goal)+'</span></div>'+
     '<p class="status">'+statusText(r,t)+'</p>'+
-    '<p class="hint">'+t.tip+'</p>'+
-    '<label class="holrow"><input type="checkbox" data-act="hol"'+(r.hol?' checked':'')+'> Holiday, so plan a full day</label>'+
+    '<label class="holrow"><input type="checkbox" data-act="hol"'+(r.hol?' checked':'')+'> Holiday, so use my holiday hours</label>'+
   '</section>'+
-  '<section class="card"><h2>Habits</h2><div class="checks">'+
-    '<button class="check" data-act="chk" data-k="a" aria-pressed="'+r.a+'"><i>'+(r.a?'&#10003;':'')+'</i><span>Studied the topic before solving</span></button>'+
-    '<button class="check" data-act="chk" data-k="v" aria-pressed="'+r.v+'"><i>'+(r.v?'&#10003;':'')+'</i><span>Redid yesterday\'s wrong problems</span></button>'+
-  '</div></section>'+
-  '<section class="card"><label class="l" for="note">What went wrong or what clicked today</label><textarea id="note" placeholder="Example: forgot long long in the factorial problem, overflowed at n = 21.">'+esc(r.n)+'</textarea></section>'+
+  habits+
+  '<section class="card"><label class="l" for="note">Notes for today</label><textarea class="in" id="note" placeholder="What went wrong, what clicked, what to fix tomorrow.">'+esc(r.n)+'</textarea></section>'+
   '</div>';
 }
 
+/* ---------- render: calendar ---------- */
 function renderCal(){
-  const today=todayStr();
+  const p=S.plan,today=todayStr(),per=perDay();
   let h='<div class="card"><div class="cal">';
-  for(let w=0;w<13;w++){
-    h+='<div class="crow"><div class="cw" title="'+esc(WEEKS[w].c)+'">W'+(w+1)+'</div>';
+  for(let w=0;w<p.weeks;w++){
+    const topics=p.tracks.map(function(t){return (p.weekly[w]&&p.weekly[w][t.id])?t.name+': '+p.weekly[w][t.id]:''}).filter(Boolean).join(' | ');
+    h+='<div class="crow"><div class="cw" title="'+esc(topics)+'">W'+(w+1)+'</div>';
     for(let j=0;j<7;j++){
-      const idx=w*7+j,d=addDays(S.start,idx),dt=parse(d),r=S.days[d];
-      const dn=isDone(d),part=!dn&&r&&(r.p>0||r.h>0),miss=!dn&&!part&&d<today;
+      const idx=w*7+j,d=addDays(p.start,idx),dt=parse(d),r=S.days[d];
+      const dn=isDone(d),part=!dn&&r&&(got(r)>0||r.h>0),miss=!dn&&!part&&d<today;
       const wkend=(dt.getDay()===0||dt.getDay()===6);
-      let cls='cell'+(wkend?' wk':'')+(dn?' done':'')+(part?' part':'')+(miss?' miss':'')+(r&&r.hol?' hol':'')+(d===today?' today':'')+(d===S.sel?' sel':'');
-      const f=part?(r.p*10)+'%':'0%';
+      const cls='cell'+(wkend?' wk':'')+(dn?' done':'')+(part?' part':'')+(miss?' miss':'')+(r&&r.hol?' hol':'')+(d===today?' today':'')+(d===S.sel?' sel':'');
+      const f=part?Math.round(got(r)/per*100)+'%':'0%';
       h+='<button class="'+cls+'" style="--f:'+f+'" data-act="goday" data-d="'+d+'" aria-label="Day '+(idx+1)+', '+WDN[dt.getDay()]+' '+short(d)+(dn?', done':'')+'">'+
         '<span class="wd">'+WDN[dt.getDay()].charAt(0)+'</span>'+
         ((idx===0||dt.getDate()===1)?'<span class="mo">'+MON[dt.getMonth()]+'</span>':'')+
@@ -325,8 +449,8 @@ function renderCal(){
     h+='</div>';
   }
   h+='</div><div class="legend">'+
-    '<span><i class="sw" style="background:var(--cpp);border-color:var(--cpp)"></i>Done</span>'+
-    '<span><i class="sw" style="background:linear-gradient(to top,var(--cpp-soft) 50%,var(--card) 50%)"></i>In progress</span>'+
+    '<span><i class="sw" style="background:var(--accent);border-color:var(--accent)"></i>Done</span>'+
+    '<span><i class="sw" style="background:linear-gradient(to top,var(--soft) 50%,var(--card) 50%)"></i>In progress</span>'+
     '<span><i class="sw" style="border-style:dashed"></i>Missed</span>'+
     '<span><i class="sw" style="background:var(--wkend)"></i>Weekend</span>'+
     '<span><i class="sw" style="background:var(--hl);border-radius:50%"></i>Holiday</span>'+
@@ -334,49 +458,114 @@ function renderCal(){
   return h;
 }
 
-function renderPlan(){
-  const curW=Math.floor(diff(clampSel(todayStr()),S.start)/7);
-  let h='<div class="card" style="margin-bottom:16px"><h2>Daily rules</h2><table>'+
-    '<tr><th>Day type</th><th>Minimum</th><th>Aim for</th></tr>'+
-    '<tr><td>Weekday</td><td>2 h</td><td>3 to 4 h</td></tr>'+
-    '<tr><td>Saturday and Sunday</td><td>3 h</td><td>6 h</td></tr>'+
-    '<tr><td>Holiday (tick it on that day)</td><td>6 h</td><td>Full day, 6 to 8 h</td></tr></table>'+
-    '<p class="hint">A day counts as done when all 10 problems are logged (5 C++ and 5 maths) and you reach the minimum hours for that day type.</p></div>';
-  for(let w=0;w<13;w++){
-    let n=0;for(let j=0;j<7;j++){if(isDone(addDays(S.start,w*7+j)))n++}
-    h+='<details class="week'+(w===curW?' cur open':'')+'"><summary><span class="wn">Week '+(w+1)+'</span><span class="wr">'+short(addDays(S.start,w*7))+' to '+short(addDays(S.start,w*7+6))+'</span><span class="wp">'+n+'/7 done</span></summary>'+
-      '<div class="wb"><p><span class="tag cpp">C++</span>'+esc(WEEKS[w].c)+'</p><p><span class="tag math">Maths</span>'+esc(WEEKS[w].m)+'</p></div></details>';
+/* ---------- render: weeks ---------- */
+function renderWeeks(){
+  const p=S.plan;
+  const curW=Math.floor(diff(clampSel(todayStr()),p.start)/7);
+  let h='<div class="card"><h2>Daily rules</h2><table>'+
+    '<tr><th>Day type</th><th>Minimum</th><th>Goal</th></tr>'+
+    ['weekday','weekend','holiday'].map(function(k){const t=tgt(k);return '<tr><td>'+TYPE_NAMES[k]+'</td><td>'+fmtH(t.min)+'</td><td>'+fmtH(t.goal)+'</td></tr>'}).join('')+
+    '</table><p class="hint">A day counts as done when you log all '+perDay()+' '+esc(p.unit)+' and reach the minimum time for that day type. Change these in Setup.</p></div>'+
+    '<p class="hint" style="margin-top:14px">Write what you will cover each week. Tap a week to open it.</p>';
+  let lastKey=-1;
+  for(let w=0;w<p.weeks;w++){
+    const ws=addDays(p.start,w*7),wd=parse(ws),key=wd.getFullYear()*12+wd.getMonth();
+    if(key!==lastKey){h+='<h2 class="mh">'+FULLMON[wd.getMonth()]+' '+wd.getFullYear()+'</h2>';lastKey=key}
+    let n=0;for(let j=0;j<7;j++){if(isDone(addDays(ws,j)))n++}
+    h+='<details class="week'+(w===curW?' cur open':'')+'"><summary><span class="wn">Week '+(w+1)+'</span><span class="wr">'+short(ws)+' to '+short(addDays(ws,6))+'</span><span class="wp">'+n+'/7 done</span></summary><div class="wb">'+
+      p.tracks.map(function(t,k){
+        const v=(p.weekly[w]&&p.weekly[w][t.id])||'';
+        return '<label class="wl" style="--tc:var(--t'+k+')"><span class="tag">'+esc(t.name)+'</span><input class="in" type="text" data-f="wk" data-w="'+w+'" data-t="'+t.id+'" value="'+esc(v)+'" placeholder="What will you cover?"></label>';
+      }).join('')+'</div></details>';
   }
   return h;
 }
 
-function renderFoot(){
-  document.getElementById('foot').innerHTML=
-    '<label>Day 1 is <input type="date" id="startd" value="'+S.start+'"></label>'+
-    '<button class="btn'+(resetArm?' danger':'')+'" data-act="reset">'+(resetArm?'Click again to erase all progress':'Reset progress')+'</button>'+
-    '<span class="grow">Progress is saved in this browser only, so use the same browser and device each day.</span>';
+/* ---------- render: setup ---------- */
+function renderSetup(){
+  const p=S.plan;
+  const trs=p.tracks.map(function(t,i){
+    return '<div class="trk" style="--tc:var(--t'+i+')"><span class="sw2"></span>'+
+      '<input class="in" type="text" maxlength="24" data-f="tname" data-i="'+i+'" value="'+esc(t.name)+'" aria-label="Track name">'+
+      '<input class="in" type="number" min="1" max="10" data-f="tn" data-i="'+i+'" value="'+t.n+'" aria-label="Per day">'+
+      (p.tracks.length>1?'<button class="btn sm" data-act="rmtrack" data-i="'+i+'">Remove</button>':'<span></span>')+'</div>';
+  }).join('');
+  const hrs=['weekday','weekend','holiday'].map(function(k){
+    const h=p.hours[k];
+    return '<tr><td>'+TYPE_NAMES[k]+(k==='weekend'?' (Sat and Sun)':k==='holiday'?' (tick on the day)':' (Mon to Fri)')+'</td>'+
+      '<td><input class="in" type="number" step="0.5" min="0" max="16" data-f="hmin" data-k="'+k+'" value="'+h.min+'" aria-label="'+k+' minimum hours"></td>'+
+      '<td><input class="in" type="number" step="0.5" min="0" max="16" data-f="hgoal" data-k="'+k+'" value="'+h.goal+'" aria-label="'+k+' goal hours"></td></tr>';
+  }).join('');
+  const habs=p.habits.map(function(h,i){
+    return '<div class="hab"><input class="in" type="text" maxlength="60" data-f="hab" data-i="'+i+'" value="'+esc(h.t)+'" aria-label="Habit"><button class="btn sm" data-act="rmhab" data-i="'+i+'">Remove</button></div>';
+  }).join('');
+  return '<div class="setup">'+
+  '<section class="card"><h2>Your goal</h2>'+
+    '<label class="fld"><span>Plan name</span><input class="in" type="text" maxlength="60" data-f="title" value="'+esc(p.title)+'"></label>'+
+    '<div class="frow" style="margin-bottom:14px">'+
+      '<label class="fld" style="margin:0"><span>Day 1 is</span><input class="in" type="date" data-f="start" value="'+p.start+'"></label>'+
+      '<label class="fld" style="margin:0"><span>Length in weeks</span><input class="in" type="number" min="1" max="52" data-f="weeks" value="'+p.weeks+'"></label>'+
+    '</div>'+
+    '<div class="frow"><button class="btn sm" data-act="setweeks" data-v="4">1 month</button><button class="btn sm" data-act="setweeks" data-v="13">3 months</button><button class="btn sm" data-act="setweeks" data-v="26">6 months</button><button class="btn sm" data-act="setweeks" data-v="52">1 year</button></div>'+
+  '</section>'+
+  '<section class="card"><h2>Daily target</h2>'+
+    '<label class="fld"><span>What are you counting?</span><input class="in" type="text" maxlength="20" data-f="unit" value="'+esc(p.unit)+'" placeholder="problems, pages, tasks"></label>'+
+    '<p class="hint" style="margin:0 0 10px">Split the daily target into tracks (up to 4). Each track gets its own row of circles on the Today tab.</p>'+
+    trs+
+    '<div class="frow"><button class="btn sm" data-act="addtrack"'+(p.tracks.length>=4?' disabled':'')+'>Add track</button><span class="hint" id="totalpd" style="margin:0">Total: '+perDay()+' '+esc(p.unit)+' a day</span></div>'+
+  '</section>'+
+  '<section class="card"><h2>Daily time</h2><table class="hrs"><tr><th>Day type</th><th>Minimum (h)</th><th>Goal (h)</th></tr>'+hrs+'</table>'+
+    '<p class="hint">Set a minimum to 0 if you do not want a time rule for that day type.</p></section>'+
+  '<section class="card"><h2>Daily habits</h2>'+
+    '<p class="hint" style="margin:0 0 10px">Optional extra checkboxes shown every day, like revising notes or sleeping on time.</p>'+
+    habs+
+    '<button class="btn sm" data-act="addhab"'+(p.habits.length>=6?' disabled':'')+'>Add habit</button></section>'+
+  '<section class="card"><h2>Backup and move devices</h2>'+
+    '<p class="hint" style="margin:0 0 10px">Export your plan and progress as text, then paste it into the same box on another device and import it.</p>'+
+    '<textarea class="in" id="io" placeholder="Exported text appears here. Paste text here to import."></textarea>'+
+    '<div class="frow" style="margin-top:8px"><button class="btn sm" data-act="export">Export</button><button class="btn sm" data-act="import">Import</button><span class="hint" id="iomsg" style="margin:0"></span></div>'+
+  '</section>'+
+  '<section class="card"><h2>Start over</h2><p class="hint" style="margin:0 0 10px">Erases your plan and all progress and takes you back to the templates.</p>'+
+    '<button class="btn'+(resetArm?' danger':'')+'" data-act="reset">'+(resetArm?'Click again to erase everything':'Erase and start over')+'</button></section>'+
+  '</div>';
 }
 
+/* ---------- main render ---------- */
 function render(){
-  renderStats();
-  document.querySelectorAll('.tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.v===S.tab))});
+  const has=!!S.plan;
+  document.getElementById('stats').hidden=!has;
+  document.getElementById('tabs').hidden=!has;
+  renderHead();
   const app=document.getElementById('app');
-  app.innerHTML=S.tab==='today'?renderToday():S.tab==='cal'?renderCal():renderPlan();
-  renderFoot();
+  if(!has){app.innerHTML=renderWelcome();return}
+  S.sel=clampSel(S.sel||todayStr());
+  renderStats();
+  document.querySelectorAll('#tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.v===S.tab))});
+  app.innerHTML=S.tab==='today'?renderToday():S.tab==='cal'?renderCal():S.tab==='weeks'?renderWeeks():renderSetup();
 }
 
+/* ---------- events ---------- */
 document.addEventListener('click',function(e){
   const b=e.target.closest('[data-act]');
   if(!b||b.tagName==='INPUT')return;
-  const a=b.dataset.act;
+  const a=b.dataset.act,p=S.plan;
   if(a!=='reset'&&resetArm)resetArm=false;
-  if(a==='tab'){S.tab=b.dataset.v}
-  else if(a==='prob'){const n=+b.dataset.n,r=edit(S.sel);r.p=(r.p===n)?n-1:n;save()}
+  if(a==='tpl'){
+    const v=b.dataset.v,s=todayStr();
+    S.plan=norm(v==='cpp'?presetCpp(s):v==='exam'?presetExam(s):presetBlank(s));
+    S.days={};S.sel=clampSel(s);S.tab=v==='blank'?'setup':'today';save();
+  }
+  else if(!p){return}
+  else if(a==='tab'){S.tab=b.dataset.v}
+  else if(a==='prob'){
+    const n=+b.dataset.n,r=edit(S.sel),cur=r.c[b.dataset.tid]||0;
+    r.c[b.dataset.tid]=(cur===n)?n-1:n;save();
+  }
   else if(a==='hinc'){const r=edit(S.sel);r.h=Math.min(16,r.h+0.5);save()}
   else if(a==='hdec'){const r=edit(S.sel);r.h=Math.max(0,r.h-0.5);save()}
-  else if(a==='chk'){const r=edit(S.sel);r[b.dataset.k]=!r[b.dataset.k];save()}
-  else if(a==='prev'){if(diff(S.sel,S.start)>0)S.sel=addDays(S.sel,-1)}
-  else if(a==='next'){if(diff(S.sel,S.start)<PLAN_DAYS-1)S.sel=addDays(S.sel,1)}
+  else if(a==='chk'){const r=edit(S.sel);r.hb[b.dataset.hid]=!r.hb[b.dataset.hid];save()}
+  else if(a==='prev'){if(diff(S.sel,p.start)>0)S.sel=addDays(S.sel,-1)}
+  else if(a==='next'){if(diff(S.sel,p.start)<planDays()-1)S.sel=addDays(S.sel,1)}
   else if(a==='jumptoday'){S.sel=clampSel(todayStr())}
   else if(a==='goday'){S.sel=b.dataset.d;S.tab='today';window.scrollTo(0,0)}
   else if(a==='tstart'){T.on=true;T.start=Date.now();clearInterval(T.iv);T.iv=setInterval(tick,1000)}
@@ -386,20 +575,75 @@ document.addEventListener('click',function(e){
     const r=edit(S.sel);r.h=Math.min(16,Number((r.h+add).toFixed(2)));
     T.on=false;save();
   }
+  else if(a==='addtrack'){if(p.tracks.length<4){p.tracks.push({id:uid(),name:'Track '+(p.tracks.length+1),n:3});save()}}
+  else if(a==='rmtrack'){if(p.tracks.length>1){p.tracks.splice(+b.dataset.i,1);save()}}
+  else if(a==='addhab'){if(p.habits.length<6){p.habits.push({id:uid(),t:'New habit'});save()}}
+  else if(a==='rmhab'){p.habits.splice(+b.dataset.i,1);save()}
+  else if(a==='setweeks'){p.weeks=+b.dataset.v;norm(p);S.sel=clampSel(S.sel);save()}
+  else if(a==='export'){
+    document.getElementById('io').value=JSON.stringify({plan:S.plan,days:S.days});
+    document.getElementById('iomsg').textContent='Copy this text and keep it somewhere safe.';
+    return;
+  }
+  else if(a==='import'){
+    const msg=document.getElementById('iomsg');
+    try{
+      const o=JSON.parse(document.getElementById('io').value);
+      if(!o||!o.plan||!Array.isArray(o.plan.tracks)||!o.plan.hours||!o.plan.start)throw new Error('bad');
+      S.plan=norm(o.plan);S.days=o.days||{};S.sel=clampSel(todayStr());save();
+    }catch(err){msg.textContent='That text is not a valid export. Paste the whole exported text and try again.';return}
+  }
   else if(a==='reset'){
     if(!resetArm){resetArm=true}
-    else{S.days={};resetArm=false;save()}
+    else{
+      S.plan=null;S.days={};resetArm=false;S.tab='today';
+      try{localStorage.removeItem(KEY);localStorage.removeItem(OLD)}catch(err){}
+    }
   }
   render();
 });
+
 document.addEventListener('change',function(e){
-  const el=e.target;
-  if(el.dataset&&el.dataset.act==='hol'){edit(S.sel).hol=el.checked;save();render()}
-  else if(el.id==='startd'&&el.value){S.start=el.value;S.sel=clampSel(todayStr());save();render()}
+  const el=e.target,p=S.plan;
+  if(!p||!el.dataset)return;
+  if(el.dataset.act==='hol'){edit(S.sel).hol=el.checked;save();render();return}
+  const f=el.dataset.f;
+  if(!f)return;
+  if(f==='tn'){const v=clamp(parseInt(el.value,10)||1,1,10);el.value=v;p.tracks[+el.dataset.i].n=v}
+  else if(f==='weeks'){const v=clamp(parseInt(el.value,10)||1,1,52);el.value=v;p.weeks=v;norm(p);S.sel=clampSel(S.sel)}
+  else if(f==='start'){if(!el.value)return;p.start=el.value;S.sel=clampSel(todayStr())}
+  else if(f==='hmin'||f==='hgoal'){
+    const k=el.dataset.k,v=clamp(parseFloat(el.value)||0,0,16);
+    el.value=v;
+    if(f==='hmin'){
+      p.hours[k].min=v;
+      if(p.hours[k].goal<v){p.hours[k].goal=v;const g=document.querySelector('[data-f="hgoal"][data-k="'+k+'"]');if(g)g.value=v}
+    }else{
+      p.hours[k].goal=v;
+      if(v<p.hours[k].min){p.hours[k].min=v;const m=document.querySelector('[data-f="hmin"][data-k="'+k+'"]');if(m)m.value=v}
+    }
+  }
+  else return;
+  save();renderStats();renderHead();
+  const tp=document.getElementById('totalpd');
+  if(tp)tp.textContent='Total: '+perDay()+' '+p.unit+' a day';
 });
+
 document.addEventListener('input',function(e){
-  if(e.target.id==='note'){edit(S.sel).n=e.target.value;save()}
+  const el=e.target,p=S.plan;
+  if(!p)return;
+  if(el.id==='note'){edit(S.sel).n=el.value;save();return}
+  const f=el.dataset&&el.dataset.f;
+  if(!f)return;
+  if(f==='title')p.title=el.value;
+  else if(f==='unit'){p.unit=el.value;const tp=document.getElementById('totalpd');if(tp)tp.textContent='Total: '+perDay()+' '+p.unit+' a day'}
+  else if(f==='tname')p.tracks[+el.dataset.i].name=el.value;
+  else if(f==='hab')p.habits[+el.dataset.i].t=el.value;
+  else if(f==='wk'){const w=+el.dataset.w;if(!p.weekly[w])p.weekly[w]={};p.weekly[w][el.dataset.t]=el.value}
+  else return;
+  save();renderHead();
 });
+
 render();
 </script>
 </body>
